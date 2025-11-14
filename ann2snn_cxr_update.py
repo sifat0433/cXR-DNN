@@ -311,7 +311,6 @@ def run_multi_mode_conversion_and_eval(model, train_files, test_files, device, T
         all_curves[str(mode)] = iou_curve
 
     # Combined Plot
-    import matplotlib.pyplot as plt
     plt.figure(figsize=(7,5))
     for mode, color in zip(modes, color_cycle):
         plt.plot(np.arange(1, T + 1), all_curves[str(mode)], marker='o', color=color, label=f"mode: {mode}")
@@ -366,3 +365,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
