@@ -10,14 +10,14 @@ class Config:
     n_points: int = 4096
 
     num_workers: int = 4
-    batch_size: int = 128
+    batch_size: int = 16
     betch_size_val_test: int = 256
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
 
     latent_dim: int = 128
     
     epochs: int = 100
-    lr: float = 1e-2
+    lr: float = 1e-3
 
     dice_weight: float = 0.7
     bce_weight: float = 0.3
