@@ -3,7 +3,6 @@ import open3d as o3d
 from pathlib import Path
 import matplotlib.pyplot as plt
 import torch
-from torch.utils.data import DataLoader
 
 
 def visualize_voxels_to_file(vox, output_path, format='ply', normalize=True):

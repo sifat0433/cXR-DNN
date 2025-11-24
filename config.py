@@ -25,4 +25,4 @@ class Config:
 
     dice_weight: float = 0.7
     bce_weight: float = 0.3
-    bce_pos_weight: float = 50.0
+    bce_pos_weight: float = 33.0

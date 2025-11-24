@@ -49,11 +49,11 @@ class PcdDataset(Dataset):
 
         assert points.shape[0] == colors.shape[0], "Points and colors must have the same number of points"
 
-        # voxelize
-        vox = self.voxelize_unit_cube(points)
-
         # normalize to unit cube
         points = self.normalize_to_unit_cube(points)
+        
+        # voxelize
+        vox = self.voxelize_unit_cube(points)
 
         # sample points
         points, colors = self.sample_points(points, colors)
