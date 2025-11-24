@@ -12,7 +12,11 @@ class Config:
     num_workers: int = 4
     batch_size: int = 16
     betch_size_val_test: int = 256
+    batch_size_ann2snn: int = 32
+    batch_size_ann2snn_test: int = 64
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
+
+    snn_steps: int = 128
 
     latent_dim: int = 128
     

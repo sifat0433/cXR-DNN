@@ -31,7 +31,7 @@ def train_epoch(model, dataloader, optimizer, config):
     return total_loss / n, total_iou / n
 
 
-def eval_epoch(model, dataloader, config):
+def evaluate(model, dataloader, config):
     device = config.device
     bce_pos_weight = config.bce_pos_weight
     dice_weight = config.dice_weight
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     for epoch in range(1, config.epochs + 1):
         tr_loss, tr_iou = train_epoch(model, tr_dataloader, optimizer, config)
         print(f"Epoch {epoch:03d}/{config.epochs} | Train Loss {tr_loss:.4f} IoU {tr_iou:.3f}")
-        val_loss, val_iou = eval_epoch(model, val_dataloader, config)
+        val_loss, val_iou = evaluate(model, val_dataloader, config)
         print(f"Epoch {epoch:03d}/{config.epochs} | Val Loss {val_loss:.4f} IoU {val_iou:.3f}")
         if val_loss < bast_val_loss:
             bast_val_loss = val_loss
