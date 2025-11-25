@@ -2,6 +2,7 @@ from spikingjelly.activation_based import ann2snn, functional
 import torch
 from loss import iou_score
 import numpy as np
+import open3d as o3d
 
 
 def collate_points(batch):
@@ -87,6 +88,27 @@ def evaluate_snn_over_time(snn_model, test_loader, device, mode, T):
             y_sum += y_t
             y_mean = y_sum / (t + 1)  # running mean over timesteps
 
+            # # visualize voxels for the last timestep
+            # if t == T - 1:
+            #     from utils import visualize_voxels_to_file, recover_depth_points_from_voxels
+            #     vox_pred_np = y_t.detach().cpu().numpy()[0]
+            #     vox_gt_np = yb.detach().cpu().numpy()[0]
+            #     grid_size = vox_pred_np.shape[0]
+            #     pred_points = recover_depth_points_from_voxels(vox_pred_np, grid_size)
+            #     gt_points = recover_depth_points_from_voxels(vox_gt_np, grid_size)
+
+            #     pcd_pred = o3d.geometry.PointCloud()
+            #     pcd_pred.points = o3d.utility.Vector3dVector(pred_points)
+            #     pred_colors = np.tile(np.array([[1.0, 0.0, 0.0]], dtype=np.float32), (len(pred_points), 1))
+            #     pcd_pred.colors = o3d.utility.Vector3dVector(pred_colors)
+            #     o3d.io.write_point_cloud(f"points_pred_snn_{mode}.ply", pcd_pred)
+
+            #     pcd_gt = o3d.geometry.PointCloud()
+            #     pcd_gt.points = o3d.utility.Vector3dVector(gt_points)
+            #     gt_colors = np.tile(np.array([[0.0, 1.0, 0.0]], dtype=np.float32), (len(gt_points), 1))
+            #     pcd_gt.colors = o3d.utility.Vector3dVector(gt_colors)
+            #     o3d.io.write_point_cloud(f"points_gt_snn_{mode}.ply", pcd_gt)
+
             # compute IoU at this timestep
             iou = iou_score(y_mean, yb)
             total_iou_t[t] += iou
@@ -125,6 +147,7 @@ if __name__ == "__main__":
 
     all_curves = {}
     modes = ['max', '99.9%', 1/2, 1/3, 1/4, 1/5]
+    # modes = ['99.9%']
     color_cycle = ['tab:red', 'tab:blue', 'tab:green', 'tab:orange', 'tab:purple', 'tab:cyan']
     for mode, color in zip(modes, color_cycle):
         snn_model = convert_ann_to_snn(model, tr_dataloader, device, mode)

@@ -34,10 +34,20 @@ class PcdDataset(Dataset):
         return points[sel], colors[sel]
 
     def voxelize_unit_cube(self, points):
+        """
+        Convert normalized depth points into an occlusion-aware voxel grid.
+        For every (x, y) column along the depth axis (z), once a surface point is
+        encountered, the entire occluded region behind it is marked as 1.
+        """
         idx = np.clip((points * (self.grid_size - 1)).astype(np.int32), 0, self.grid_size - 1)
         vox = np.zeros((self.grid_size, self.grid_size, self.grid_size), dtype=np.float32)
         vox[idx[:, 0], idx[:, 1], idx[:, 2]] = 1.0
-        return vox
+
+        # Fill occluded regions: cumulative sum along depth axis turns every column
+        # behind the first hit to 1 while keeping empty columns at 0.
+        occluded = np.cumsum(vox, axis=2)
+        occluded[occluded > 0] = 1.0
+        return occluded
 
     def __len__(self):
         return len(self.file_list)
@@ -68,6 +78,9 @@ if __name__ == "__main__":
 
     from torch.utils.data import DataLoader
     from utils import visualize_voxels_to_file
+    from utils import recover_depth_points_from_voxels
+    grid_size = config.grid_size
+
     dataloader = DataLoader(dataset, batch_size=2, shuffle=True)
     for data in dataloader:
         print(data["points"].shape) # [N, n_points, 3]
@@ -79,4 +92,16 @@ if __name__ == "__main__":
         visualize_voxels_to_file(vox_np, "voxel_vis.ply", format='ply')
         # visualize_voxels_to_file(vox_np, "voxel_vis.obj", format='obj')
         # visualize_voxels_to_file(vox_np, "voxel_vis.png", format='png')
+        points = recover_depth_points_from_voxels(vox_np, grid_size)
+        
+        # save points to ply
+        pcd = o3d.geometry.PointCloud()
+        pcd.points = o3d.utility.Vector3dVector(points)
+        o3d.io.write_point_cloud("points.ply", pcd)
+
+        # visualize gt points
+        pcd = o3d.geometry.PointCloud()
+        pcd.points = o3d.utility.Vector3dVector(data["points"][0])
+        o3d.io.write_point_cloud("gt_points.ply", pcd)
+
         break

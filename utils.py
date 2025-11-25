@@ -147,3 +147,24 @@ def estimate_pos_weight(dataloader):
     # Clamp to avoid extremes
     w = max(1.0, min(neg / max(pos, 1.0), 50.0))
     return float(w)
+
+def recover_depth_points_from_voxels(vox, grid_size):
+    """
+    Approximate inverse of voxelize_unit_cube.
+    Extract the first visible depth sample for every (x, y) column from the
+    occlusion-aware voxel grid, returning normalized point coordinates.
+    """
+    assert vox.shape == (grid_size, grid_size, grid_size), \
+        "Voxel grid shape mismatch"
+    depth_mask = vox > 0
+    has_hits = depth_mask.any(axis=2)
+    first_hit_idx = np.argmax(depth_mask, axis=2)
+
+    xs, ys = np.nonzero(has_hits)
+    if len(xs) == 0:
+        return np.empty((0, 3), dtype=np.float32)
+
+    zs = first_hit_idx[xs, ys]
+    coords = np.stack([xs, ys, zs], axis=1).astype(np.float32)
+    coords /= (grid_size - 1)
+    return coords
