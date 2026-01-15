@@ -109,7 +109,7 @@ if __name__ == "__main__":
     val_dataset = PcdDataset(config=config, split="val")
     val_dataloader = DataLoader(
         val_dataset, 
-        batch_size=config.betch_size_val_test, 
+        batch_size=config.batch_size_val_test, 
         shuffle=False,
         num_workers=config.num_workers,
         pin_memory=True if config.device == "cuda" else False,

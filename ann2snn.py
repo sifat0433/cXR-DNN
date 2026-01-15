@@ -3,6 +3,7 @@ import torch
 from loss import iou_score
 import numpy as np
 import open3d as o3d
+from config import Config
 
 
 def collate_points(batch):
@@ -68,6 +69,41 @@ def convert_ann_to_snn(model, dataloader, device, mode):
     print(f"Converting ANN to SNN (mode={mode})...")
     converter = ann2snn.Converter(dataloader=dataloader, device=str(device), mode=mode)
     snn_model = converter(model)
+    return snn_model
+
+def load_fine_tuned_snn(checkpoint_path, device):
+    """
+    Load fine-tuned SNN model
+    
+    Args:
+        checkpoint_path: Model checkpoint path
+        device: Device
+        
+    Returns:
+        SNN model
+    """
+    from model import AE
+    from dataset import PcdDataset
+    from torch.utils.data import DataLoader
+    
+    config = Config()
+    
+    # Load original ANN model as reference for conversion
+    ann_model = AE().to(device)
+    ann_model.load_state_dict(torch.load("best_model.pth", map_location=device))
+    
+    # Prepare conversion dataset
+    tr_dataset = PcdDataset(config=config, split="train")
+    tr_dataloader = DataLoader(tr_dataset, batch_size=config.batch_size_ann2snn, shuffle=True, collate_fn=collate_points)
+    
+    # Convert to SNN
+    snn_model = convert_ann_to_snn(ann_model, tr_dataloader, device, mode='max')
+    snn_model = snn_model.to(device)
+    
+    # Load fine-tuned weights
+    snn_model.load_state_dict(torch.load(checkpoint_path, map_location=device))
+    print(f"Loaded fine-tuned SNN model: {checkpoint_path}")
+    
     return snn_model
 
 @torch.no_grad()
