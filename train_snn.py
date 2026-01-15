@@ -220,7 +220,7 @@ if __name__ == "__main__":
     test_dataset = PcdDataset(config=config, split="test")
     test_dataloader = DataLoader(
         test_dataset,
-        batch_size=config.betch_size_val_test,
+        batch_size=config.batch_size_ann2snn_test,
         shuffle=False,
         collate_fn=collate_points,
         num_workers=config.num_workers,
