@@ -125,4 +125,6 @@ if __name__ == "__main__":
         if val_iou > best_iou:
             best_iou = val_iou
             torch.save(model.state_dict(), f"best_model.pth")
+            torch.save(model.encoder.state_dict(), f"best_encoder_model.pth")
+            torch.save(model.decoder.state_dict(), f"best_decoder_model.pth")
             print(f"Saved best model to best_model.pth")
